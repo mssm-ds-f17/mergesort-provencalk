@@ -10,31 +10,58 @@ class Thing{
 public:
     int id;
     int thingNum;
-    Thing(){}
-    Thing(int id){this->id=id;}
+    string name;
+    Thing(int id=0,string s="");
 };
-bool compareThingsById(const Thing&a, const Thing&b){
-    return a.id<b.id;
+Thing::Thing(int id, string s){
+    this->id=id;
+    this->name=s;
 }
-bool isSorted(const vector<int>& values){
-    if(values.size()<=1){
-        return true;
-    }
-    for(unsigned int i=1; i<values.size();i++){
-        if(values[i]<=values[i-1]){
-            return false;
-        }
-    }
-    return true;
+int random(int maxValue) {
+    return rand() % maxValue + 1;
 }
+std::string randomString(int length )
+{
+    auto randchar = []() -> char
+    {
+        const char charset[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+        const unsigned int max_index = (sizeof(charset) - 1);
+        return charset[ rand() % max_index ];
+    };
+    std::string str(length,0);
+    std::generate_n( str.begin(), length, randchar );
+    return str;
+}
+vector<Thing> makeRandomThings(int count, int maxId)
+{
+    vector<Thing> things;
+    for (int i = 0; i < count; i++) {
+        things.push_back(Thing(random(maxId),randomString(5)));
+    }
+    for (int i = 0; i < count; i++) {
+        things[i].thingNum = i+1;
+    }
+    return things;
+}
+
 void print(vector<int> v){
     for(unsigned int i=0;i<v.size();i++){
         cout<<v[i]<<", ";
     }
     cout<<endl;
 }
+void print(vector<Thing> t){
+    for(unsigned int i=0; i<t.size(); i++){
+        cout<<t[i].id<<": ";
+        cout<<t[i].name<<", ";
+    }
+    cout<<endl;
+}
 
-/*bool isSorted(vector<Thing>& things, function<bool(const Thing& a, const Thing& b)> comp){
+bool isSorted(vector<Thing>& things, function<bool(const Thing& a, const Thing& b)> comp){
     if(things.size()<=1){
         return true;
     }
@@ -45,6 +72,42 @@ void print(vector<int> v){
     }
     return true;
 }
+bool operator<(string& a, string& b){
+    const char charset[]="a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,"
+                          "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,"
+                          "0,1,2,3,4,5,6,7,8,9";
+    int a_index;
+    int b_index;
+    for(unsigned int i=0;i<a.size();i++){
+        for(unsigned int j=0;j<sizeof(charset);j++){
+            if(a[i]==charset[j]){
+                a_index=j;
+            }
+            if(b[i]==charset[j]){
+                b_index=j;
+            }
+            if(a_index<b_index){
+                return true;
+            }
+            else{
+                break;
+            }
+        }
+    }
+     return false;
+}
+bool operator<(Thing& a, Thing& b) {
+    if(a.id<b.id){
+        return true;
+    }
+    else if(a.id==b.id&&a.name<b.name){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
 
 void merge(vector<Thing>&t, int l, int m, int r){
     int i,j,k;
@@ -55,7 +118,7 @@ void merge(vector<Thing>&t, int l, int m, int r){
     j=m+1;
     k=0;
     while(i<=m&&j<=r){
-        if(t[i].thingNum<t[j].thingNum){
+        if(t[i]<t[j]){
             T[k]=t[i];
             i++;
         }
@@ -80,8 +143,8 @@ void merge(vector<Thing>&t, int l, int m, int r){
     for(i=l;i<=r;i++){
         t[i]=T[i-l];
     }
-}*/
-void merge(vector<int>v, int l, int m, int r){
+}
+void merge(vector<int>&v, int l, int m, int r){
     int i,j,k;
     //temporary vectors
     vector<int>V(r-l+1);
@@ -116,7 +179,7 @@ void merge(vector<int>v, int l, int m, int r){
         v[i]=V[i-l];
     }
 }
-/*void mergeSort(vector<Thing>& t, int start, int end){
+void mergeSort(vector<Thing>& t, int start, int end){
     if(start < end){
         int middle = (start+end)/2;
         mergeSort(t,start,middle);
@@ -124,10 +187,9 @@ void merge(vector<int>v, int l, int m, int r){
         merge(t,start,middle,end);
     }
 }
-*/
-void mergeSort(vector<int> values, int start, int end){
+void mergeSort(vector<int>& values, int start, int end){
     if(start < end){
-        int middle = start+end/2;
+        int middle = (start+end)/2;
         mergeSort(values,start,middle);
         mergeSort(values,middle+1,end);
         merge(values,start,middle,end);
@@ -135,10 +197,13 @@ void mergeSort(vector<int> values, int start, int end){
 }
 
 int main()
-{
+{   vector<Thing>t=makeRandomThings(10,20);
     vector<int> v{6,78,3,22,45,33,63,88,54,99,1};
-    cout<<v.size()<<endl;
-    mergeSort(v,0,v.size()-1);
     print(v);
+    print(t);
+    mergeSort(v,0,v.size()-1);
+    mergeSort(t,0,t.size()-1);
+    print(v);
+    print(t);
     return 0;
 }
